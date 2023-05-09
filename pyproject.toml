@@ -5,7 +5,9 @@ description = ""
 authors = ["kylestratis <kyle.stratis@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = ">=3.8"
+python-dotenv = "^1.0.0"
+pinecone-client = "^2.2.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
