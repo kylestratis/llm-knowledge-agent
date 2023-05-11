@@ -94,3 +94,5 @@ If you want to read more about data engineering and data science, then check out
 
 enriched_text = agent.ingest_article(TEST_TEXT)
 print(agent.summarize_article(enriched_text))
+print(agent.generate_outline(enriched_text))
+print(agent.get_main_ideas(enriched_text))
