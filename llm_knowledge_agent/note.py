@@ -12,7 +12,14 @@ from obsidian_lit_note import obsidian_source_note_template
 
 
 class Note:
-    def __init__(self, title: str, text: str, tags: list[str], note_directory: str, publish: bool = False):
+    def __init__(
+        self,
+        title: str,
+        text: str,
+        tags: list[str],
+        note_directory: str,
+        publish: bool = False,
+    ):
         self.title = title
         self.text = text
         self.tags = []
@@ -21,14 +28,21 @@ class Note:
         self.note_directory = note_directory
         self.filename: str = None
 
-    def generate_note(self, tool_name: str):
+    def generate_note(self, tool_name: str, save: bool = True):
         supported_tools = ["obsidian"]
 
         if tool_name not in supported_tools:
             raise ValueError(f"{tool_name} not currently supported") from None
+        self.tool_dispatch[tool_name]
+        if save:
+            self._save_note()
 
     def _generate_obsidian_note(self):
         raise NotImplementedError
+
+    def _save_note(self):
+        with open(f"{self.note_directory}/{self.filename}", "w") as f:
+            f.write(self.generate_note)
 
 
 class SourceNote(Note):
@@ -49,11 +63,13 @@ class SourceNote(Note):
         self.summary = summary
         self.outline = outline
         self.link = link
-        super().__init__(title=title, text=text, tags=tags, note_directory=note_directory, publish=publish)
-
-    def generate_note(self, tool_name: str) -> None:
-        super().generate_note(tool_name)
-        self.tool_dispatch[tool_name]
+        super().__init__(
+            title=title,
+            text=text,
+            tags=tags,
+            note_directory=note_directory,
+            publish=publish,
+        )
 
     def _generate_obsidian_note(self) -> None:
         # Format tags
@@ -74,10 +90,6 @@ class SourceNote(Note):
             outline=self.outline,
         )
 
-    def _save_note(self):
-        with open(f"{self.note_directory}/{self.filename}", "w") as f:
-            f.write(self.generate_note)
-
 
 # Simple test
 if __name__ == "__main__":
@@ -88,6 +100,7 @@ if __name__ == "__main__":
         text_authors=["Kyle Stratis"],
         summary="Summary",
         outline="Outline",
+        note_directory="/dir",
     )
-    s.generate_note("obsidian")
+    s.generate_note("obsidian", save=False)
     s.generate_note("tana")
