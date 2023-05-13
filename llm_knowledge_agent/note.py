@@ -2,13 +2,15 @@
 A representation of a note with utilities for converting to knowledgebase formats
 """
 # Standard library imports
-from abc import abstractmethod
 
 # Third party imports
 import pathvalidate
 
 # Internal imports
-from obsidian_lit_note import obsidian_source_note_template
+from obsidian_templates import (
+    obsidian_source_note_template,
+    obsidian_evergreen_note_template,
+)
 
 
 class Note:
@@ -91,6 +93,46 @@ class SourceNote(Note):
         )
 
 
+class EvergreenNote(Note):
+    def __init__(
+        self,
+        title: str,
+        text: str,
+        tags: list[str],
+        note_directory: str,
+        sources: list[str],
+        publish: bool = False,
+        status: str = "boat",
+    ):
+        self.status = status
+        self.sources = sources
+        super().__init__(
+            title=title,
+            text=text,
+            tags=tags,
+            note_directory=note_directory,
+            publish=publish,
+        )
+        self.tags.append("#note/evergreen")
+
+    def _generate_obsidian_note(self):
+        # Format tags
+        tags = " ".join(self.tags)
+        # Format sources
+        metadata_sources = " ".join(self.sources)
+        body_sources = "\n".join([f"- {source}" for source in self.sources])
+        # Set file name
+        self.filename = f"{pathvalidate.sanitize_filename(self.title)}.md"
+        self.generated_note = obsidian_evergreen_note_template.substitute(
+            publish=self.publish,
+            status=self.status,
+            metadata_sources=metadata_sources,
+            tags=tags,
+            text=self.text,
+            body_sources=body_sources,
+        )
+
+
 # Simple test
 if __name__ == "__main__":
     s = SourceNote(
@@ -103,4 +145,13 @@ if __name__ == "__main__":
         note_directory="/dir",
     )
     s.generate_note("obsidian", save=False)
-    s.generate_note("tana")
+    print(s.generated_note)
+    e = EvergreenNote(
+        title="Evergreen Title",
+        text="Lorem ipsum dolor est",
+        tags=["#test"],
+        note_directory="/dir",
+        sources=["source 1", "source π"],
+    )
+    e.generate_note("obsidian", save=False)
+    print(e.generated_note)

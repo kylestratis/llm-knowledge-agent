@@ -20,3 +20,23 @@ $summary
 $outline
 """
 )
+
+
+obsidian_evergreen_note_template = Template(
+    """
+---
+publish: $publish
+---
+
+> [!META]- Inline Metadata
+> [status:: $status]
+> [source:: $metadata_sources]
+> [tags:: $tags]
+> [up:: ]
+
+$text
+
+## Sources
+$body_sources
+    """
+)

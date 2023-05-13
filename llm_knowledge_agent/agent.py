@@ -3,6 +3,7 @@ import pathlib
 
 # Internal imports
 from .enriched_text import EnrichedText
+from .note import EvergreenNote
 
 # Third party imports
 import cohere
@@ -51,3 +52,6 @@ def generate_outline(text: EnrichedText) -> str:
         return_likelihoods="NONE",
     )
     return response.generations[0].text
+
+def parse_evergreen_note(note: EvergreenNote):
+    raise NotImplementedError
