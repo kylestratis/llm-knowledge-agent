@@ -129,3 +129,6 @@ evergreen_note = EvergreenNote(
     sources=TEST_SOURCES,
 )
 print(evergreen_note)
+
+agent.load_knowledgebase()
+agent.refresh_knowledgebase()

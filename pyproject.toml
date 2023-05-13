@@ -7,10 +7,10 @@ authors = ["kylestratis <kyle.stratis@gmail.com>"]
 [tool.poetry.dependencies]
 python = ">=3.8,<4.0"
 python-dotenv = "^1.0.0"
-pinecone-client = "^2.2.1"
 cohere = "^4.3.1"
 en-core-web-sm = {url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0-py3-none-any.whl"}
 pathvalidate = "^2.5.2"
+chromadb = "^0.3.22"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
