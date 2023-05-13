@@ -7,7 +7,7 @@ A representation of a note with utilities for converting to knowledgebase format
 import pathvalidate
 
 # Internal imports
-from obsidian_templates import (
+from .obsidian_templates import (
     obsidian_source_note_template,
     obsidian_evergreen_note_template,
 )
@@ -17,13 +17,11 @@ class Note:
     def __init__(
         self,
         title: str,
-        text: str,
         tags: list[str],
         note_directory: str,
         publish: bool = False,
     ):
         self.title = title
-        self.text = text
         self.tags = []
         self.publish = publish
         self.tool_dispatch = {"obsidian": self._generate_obsidian_note()}
@@ -46,12 +44,14 @@ class Note:
         with open(f"{self.note_directory}/{self.filename}", "w") as f:
             f.write(self.generate_note)
 
+    def __str__(self):
+        return self.generated_note
+
 
 class SourceNote(Note):
     def __init__(
         self,
-        title: str,
-        text: str,
+        title: str,  # Article title
         tags: list[str],
         text_authors: list[str],
         summary: str,
@@ -61,13 +61,12 @@ class SourceNote(Note):
         publish: bool = False,
     ):
         self.text_authors = text_authors
-        self.status = "Machine-read"
+        self.status = "To Review"
         self.summary = summary
         self.outline = outline
         self.link = link
         super().__init__(
             title=title,
-            text=text,
             tags=tags,
             note_directory=note_directory,
             publish=publish,
@@ -96,7 +95,7 @@ class SourceNote(Note):
 class EvergreenNote(Note):
     def __init__(
         self,
-        title: str,
+        title: str,  # Note title
         text: str,
         tags: list[str],
         note_directory: str,
@@ -106,9 +105,9 @@ class EvergreenNote(Note):
     ):
         self.status = status
         self.sources = sources
+        self.text = text
         super().__init__(
             title=title,
-            text=text,
             tags=tags,
             note_directory=note_directory,
             publish=publish,

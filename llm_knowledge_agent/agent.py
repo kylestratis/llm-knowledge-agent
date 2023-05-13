@@ -28,16 +28,18 @@ def summarize_article(text: EnrichedText) -> str:
     return summarize_response.summary
 
 
-def get_main_ideas(text:EnrichedText) -> str:
+def get_main_ideas(text: EnrichedText) -> str:
     summarize_response = cohere_client.summarize(
         text=text.enriched_text,
-        length='long',
-        format='bullets',
-        model='summarize-xlarge',
-        additional_command='focus on getting main ideas and arguments',
+        length="long",
+        format="bullets",
+        model="summarize-xlarge",
+        additional_command="focus on getting main ideas and arguments",
         temperature=0.7,
     )
-    return summarize_response.summary
+    return [
+        main_idea[2:] for main_idea in summarize_response.summary.strip().split("\n")
+    ]
 
 
 def generate_outline(text: EnrichedText) -> str:
@@ -52,6 +54,41 @@ def generate_outline(text: EnrichedText) -> str:
         return_likelihoods="NONE",
     )
     return response.generations[0].text
+
+
+def generate_evergreen_note_text(main_idea: str, outline: str) -> str:
+    prompt = f"""
+    Assertion: {main_idea}
+    Outline: {outline}
+    Using the outline as context and any outside information you have available, expand the assertion text into an evergreen note.
+    """
+    short_prompt = f"""
+    Assertion: {main_idea}
+    Using any outside information you have available, expand the assertion text into an evergreen note.
+    """
+    try:
+        response = cohere_client.generate(
+            model="command-nightly",
+            prompt=prompt,
+            max_tokens=754,
+            temperature=1.2,
+            k=0,
+            stop_sequences=[],
+            return_likelihoods="NONE",
+        )
+    except cohere.CohereError as e:
+        if e.http_status / 100 == 4:
+            response = cohere_client.generate(
+                model="command-nightly",
+                prompt=short_prompt,
+                max_tokens=754,
+                temperature=1.2,
+                k=0,
+                stop_sequences=[],
+                return_likelihoods="NONE",
+            )
+    return response.generations[0].text
+
 
 def parse_evergreen_note(note: EvergreenNote):
     raise NotImplementedError

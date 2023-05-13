@@ -1,5 +1,6 @@
-from llm_knowledge_agent import agent
+from llm_knowledge_agent import agent, SourceNote, EvergreenNote
 
+# TODO - add these to CLI
 TEST_TEXT = """
 If you’re relying on your OLTP system to provide analytics, you might be in for a surprise. While it can work initially, these systems aren’t designed to handle complex queries. Adding databases like MongoDB and CassandraDB only makes matters worse, since they’re not SQL-friendly – the language most analysts and data practitioners are used to. Over time, these systems simply can’t keep up with the demands of performing analytics.
 
@@ -92,7 +93,39 @@ And hopefully, you now have a better understanding of why we make the distinctio
 If you want to read more about data engineering and data science, then check out these articles.
 """
 
+TEST_TITLE = "Test Article Part 2"
+TEST_TAGS = ["#test", "#nested/tag"]
+TEST_DIRECTORY = "~/test"
+TEST_AUTHORS = ["Sebastian Vettel"]
+TEST_LINK = "https://erisianrite.com"
+
+TEST_SOURCES = [TEST_LINK]
+
 enriched_text = agent.ingest_article(TEST_TEXT)
-print(agent.summarize_article(enriched_text))
-print(agent.generate_outline(enriched_text))
-print(agent.get_main_ideas(enriched_text))
+summary = agent.summarize_article(enriched_text)
+outline = agent.generate_outline(enriched_text)
+main_ideas = agent.get_main_ideas(enriched_text)
+
+source_note = SourceNote(
+    title=TEST_TITLE,
+    tags=TEST_TAGS,
+    text_authors=TEST_AUTHORS,
+    summary=summary,
+    outline=outline,
+    note_directory=TEST_DIRECTORY,
+    link=TEST_LINK,
+)
+print(source_note)
+
+evergreen_text = agent.generate_evergreen_note_text(
+    main_idea=main_ideas[0], outline=outline
+)
+
+evergreen_note = EvergreenNote(
+    title=main_ideas[0],
+    text=evergreen_text,
+    tags=TEST_TAGS,
+    note_directory=TEST_DIRECTORY,
+    sources=TEST_SOURCES,
+)
+print(evergreen_note)
