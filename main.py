@@ -80,7 +80,7 @@ def make_note(article: str, demo: bool):
             evergreen_note=evergreen_note
         )
         if demo:
-            evergreen_note.generate_note(tool_name="obsidian", save="False")
+            evergreen_note.generate_note(tool_name="obsidian", save=False)
             click.echo(evergreen_note)
         else:
             evergreen_note.generate_note(tool_name="obsidian")
