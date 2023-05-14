@@ -5,3 +5,10 @@ and forming new knowledge outputs such as zettels or evergreen notes.
 
 ## Warning
 This is mostly a prototype to learn about building LLMs. With paid API access, this could get very costly very quickly and has not yet been optimized for cost-effectiveness.
+
+## Article file format
+TITLE
+AUTHORS (separated by commas)
+TAGS (#format separated by commas)
+URL
+TEXT

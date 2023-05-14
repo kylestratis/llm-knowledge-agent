@@ -3,15 +3,16 @@ import os
 import pathlib
 import uuid
 
-# Internal imports
-from .enriched_text import EnrichedText
-from .note import EvergreenNote
-
 # Third party imports
 import cohere
 import chromadb
 from chromadb.config import Settings
 from dotenv import dotenv_values
+
+# Internal imports
+from .enriched_text import EnrichedText
+from .note import EvergreenNote
+
 
 ENV_LOCATION = pathlib.Path(__file__).parent.parent.resolve() / ".env"
 CONFIG: dict = dotenv_values(ENV_LOCATION)
@@ -80,7 +81,7 @@ def generate_evergreen_note_text(main_idea: str, outline: str) -> str:
     """
     try:
         response = cohere_client.generate(
-            model="command-nightly",
+            model="command-xlarge-nightly",
             prompt=prompt,
             max_tokens=754,
             temperature=1.2,
@@ -99,7 +100,7 @@ def generate_evergreen_note_text(main_idea: str, outline: str) -> str:
                 stop_sequences=[],
                 return_likelihoods="NONE",
             )
-    return response.generations[0].text
+    return response.generations[0].text.rstrip()
 
 
 def _parse_evergreen_note(note: EvergreenNote):
@@ -133,7 +134,7 @@ def delete_knowledgebase():
     kb_collection.delete()
 
 
-def find_and_connect_related_notes(evergreen_note: EvergreenNote) -> EvergreenNote:
+def find_and_connect_related_notes(evergreen_note: EvergreenNote) -> list[str]:
     """
     Search against database for similar notes
     """
@@ -145,7 +146,8 @@ def find_and_connect_related_notes(evergreen_note: EvergreenNote) -> EvergreenNo
     all_docs.extend(query_results["documents"][1])
     all_distances = query_results["distances"][0]
     all_distances.extend(query_results["distances"][1])
-    indexes = [idx for idx, _ in enumerate(all_distances) if idx < TARGET_DISTANCE]
-    match_docs = [all_docs[idx] for idx in indexes]
-    evergreen_note.related_notes = match_docs
-    return evergreen_note
+    indexes = [
+        idx for idx, distance in enumerate(all_distances) if distance < TARGET_DISTANCE
+    ]
+    match_docs = list(set([all_docs[idx] for idx in indexes]))
+    return match_docs

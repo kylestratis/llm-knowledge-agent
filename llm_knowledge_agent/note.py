@@ -22,9 +22,9 @@ class Note:
         publish: bool = False,
     ):
         self.title = title
-        self.tags = []
+        self.tags = tags
         self.publish = publish
-        self.tool_dispatch = {"obsidian": self._generate_obsidian_note()}
+        self.tool_dispatch = {"obsidian": self._generate_obsidian_note}
         self.note_directory = note_directory
         self.filename: str = None
 
@@ -33,7 +33,7 @@ class Note:
 
         if tool_name not in supported_tools:
             raise ValueError(f"{tool_name} not currently supported") from None
-        self.tool_dispatch[tool_name]
+        self.tool_dispatch[tool_name]()
         if save:
             self._save_note()
 
@@ -42,7 +42,7 @@ class Note:
 
     def _save_note(self):
         with open(f"{self.note_directory}/{self.filename}", "w") as f:
-            f.write(self.generate_note)
+            f.write(self.generated_note)
 
     def __str__(self):
         return self.generated_note
@@ -113,17 +113,18 @@ class EvergreenNote(Note):
             note_directory=note_directory,
             publish=publish,
         )
-        self.tags.append("#note/evergreen")
 
     def _generate_obsidian_note(self):
         # Format tags
-        tags = " ".join(self.tags)
+        tag_list = self.tags + ["#note/evergreen"]
+        tags = " ".join(tag_list)
         # Format sources
         metadata_sources = " ".join(self.sources)
         body_sources = "\n".join([f"- {source}" for source in self.sources])
         # Set file name
         self.filename = f"{pathvalidate.sanitize_filename(self.title)}.md"
         # Format related notes
+        print(f"in _generate_obsidian note {self.related_notes=}")
         if self.related_notes:
             related_notes = "\n".join([f"- [[{note}]]" for note in self.related_notes])
         else:
