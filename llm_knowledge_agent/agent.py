@@ -12,11 +12,11 @@ import cohere
 import chromadb
 from chromadb.config import Settings
 from dotenv import dotenv_values
-import pinecone
 
 ENV_LOCATION = pathlib.Path(__file__).parent.parent.resolve() / ".env"
-CONFIG = dotenv_values(ENV_LOCATION)
+CONFIG: dict = dotenv_values(ENV_LOCATION)
 KB_COLLECTION_NAME = "kb_collection"
+TARGET_DISTANCE: float = 1.0
 
 cohere_client = cohere.Client(CONFIG["COHERE_KEY"])
 chroma_client = chromadb.Client(
@@ -109,10 +109,10 @@ def _parse_evergreen_note(note: EvergreenNote):
 def load_knowledgebase():
     """
     In the future, this will parse a note and use tags and any other detected metadata as metadata in building the collection
+    Only run this once, otherwise you'll create duplicates
     """
-
-    # This is needed when, e.g., refresh_knowledgebase is called
     kb_collection = chroma_client.get_or_create_collection(name=KB_COLLECTION_NAME)
+
     evergreens = [
         note_title[:-3] for note_title in os.listdir(CONFIG["EVERGREEN_NOTE_DIRECTORY"])
     ]
@@ -126,10 +126,26 @@ def load_knowledgebase():
     kb_collection.add(documents=documents, ids=ids)
 
 
-def refresh_knowledgebase():
+def delete_knowledgebase():
     """
-    Deletes collection and adds everything back to it
+    Use only in case of emergency, such as creating duplicates in your DB
     """
-    chroma_client.delete_collection(name=KB_COLLECTION_NAME)
-    # Recreate collection
-    load_knowledgebase()
+    kb_collection.delete()
+
+
+def find_and_connect_related_notes(evergreen_note: EvergreenNote) -> EvergreenNote:
+    """
+    Search against database for similar notes
+    """
+    query_results = kb_collection.query(
+        query_texts=[evergreen_note.title, evergreen_note.text], n_results=5
+    )
+
+    all_docs = query_results["documents"][0]
+    all_docs.extend(query_results["documents"][1])
+    all_distances = query_results["distances"][0]
+    all_distances.extend(query_results["distances"][1])
+    indexes = [idx for idx, _ in enumerate(all_distances) if idx < TARGET_DISTANCE]
+    match_docs = [all_docs[idx] for idx in indexes]
+    evergreen_note.related_notes = match_docs
+    return evergreen_note

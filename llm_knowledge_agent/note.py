@@ -106,6 +106,7 @@ class EvergreenNote(Note):
         self.status = status
         self.sources = sources
         self.text = text
+        self.related_notes = None
         super().__init__(
             title=title,
             tags=tags,
@@ -122,6 +123,11 @@ class EvergreenNote(Note):
         body_sources = "\n".join([f"- {source}" for source in self.sources])
         # Set file name
         self.filename = f"{pathvalidate.sanitize_filename(self.title)}.md"
+        # Format related notes
+        if self.related_notes:
+            related_notes = "\n".join([f"- [[{note}]]" for note in self.related_notes])
+        else:
+            related_notes = ""
         self.generated_note = obsidian_evergreen_note_template.substitute(
             publish=self.publish,
             status=self.status,
@@ -129,6 +135,7 @@ class EvergreenNote(Note):
             tags=tags,
             text=self.text,
             body_sources=body_sources,
+            related_notes=related_notes,
         )
 
 

@@ -38,5 +38,8 @@ $text
 
 ## Sources
 $body_sources
+
+## Related Notes
+$related_notes
     """
 )

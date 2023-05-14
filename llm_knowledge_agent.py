@@ -93,6 +93,12 @@ And hopefully, you now have a better understanding of why we make the distinctio
 If you want to read more about data engineering and data science, then check out these articles.
 """
 
+TEST_TEXT_2 = """
+Click supports two types of parameters for scripts: options and arguments. There is generally some confusion among authors of command line scripts of when to use which, so here is a quick overview of the differences. As its name indicates, an option is optional. While arguments can be optional within reason, they are much more restricted in how optional they can be.
+
+To help you decide between options and arguments, the recommendation is to use arguments exclusively for things like going to subcommands or input filenames / URLs, and have everything else be an option instead.
+"""
+
 TEST_TITLE = "Test Article Part 2"
 TEST_TAGS = ["#test", "#nested/tag"]
 TEST_DIRECTORY = "~/test"
@@ -101,7 +107,10 @@ TEST_LINK = "https://erisianrite.com"
 
 TEST_SOURCES = [TEST_LINK]
 
-enriched_text = agent.ingest_article(TEST_TEXT)
+# agent.delete_knowledgebase()
+# agent.load_knowledgebase()
+
+enriched_text = agent.ingest_article(TEST_TEXT_2)
 summary = agent.summarize_article(enriched_text)
 outline = agent.generate_outline(enriched_text)
 main_ideas = agent.get_main_ideas(enriched_text)
@@ -120,7 +129,6 @@ print(source_note)
 evergreen_text = agent.generate_evergreen_note_text(
     main_idea=main_ideas[0], outline=outline
 )
-
 evergreen_note = EvergreenNote(
     title=main_ideas[0],
     text=evergreen_text,
@@ -128,7 +136,7 @@ evergreen_note = EvergreenNote(
     note_directory=TEST_DIRECTORY,
     sources=TEST_SOURCES,
 )
-print(evergreen_note)
 
-agent.load_knowledgebase()
-agent.refresh_knowledgebase()
+evergreen_note = agent.find_and_connect_related_notes(evergreen_note=evergreen_note)
+evergreen_note._generate_obsidian_note()
+print(evergreen_note)
